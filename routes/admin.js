@@ -4,7 +4,7 @@ const router = express.Router();
 const products = [];
 
 router.get("/add-product", (req, res) => {
-  res.render('addProduct');
+  res.render('addProduct', { docTitle: "Add product", path: "/admin/add-product"});
 });
 
 router.post("/add-product", (req, res) => {

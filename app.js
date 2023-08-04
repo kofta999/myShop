@@ -12,7 +12,7 @@ app.use(shopRoutes);
 app.use("/admin", adminData.routes);
 
 app.use((req, res) => {
-  res.status(404).render('404');
+  res.status(404).render('404', { docTitle: "Page not found"});
 });
 
 app.listen(3000, (req, res) => console.log("connected on port 3000"));
