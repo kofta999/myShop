@@ -1,4 +1,5 @@
-const products = [];
+const { product } = require("ramda");
+const Product = require("../models/product");
 
 exports.getAddProduct = (req, res) => {
   res.render("addProduct", {
@@ -11,17 +12,20 @@ exports.getAddProduct = (req, res) => {
 };
 
 exports.postAddProduct = (req, res) => {
-  products.push({ title: req.body.title });
+  const product = new Product(req.body.title);
+  product.save();
   res.redirect("/");
 };
 
 exports.getAllProducts = (req, res) => {
-  res.render("shop", {
-    prods: products,
-    docTitle: "Shop",
-    path: "/",
-    hasProducts: products.length > 0,
-    activeShop: true,
-    productCSS: true
+  Product.fetchAll((products) => {
+    res.render("shop", {
+      prods: products,
+      docTitle: "Shop",
+      path: "/",
+      hasProducts: products.length > 0,
+      activeShop: true,
+      productCSS: true
+    });
   });
 };
