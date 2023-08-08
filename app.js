@@ -6,7 +6,7 @@ const shopRoutes = require("./routes/shop");
 const errorController = require("./controllers/errors")
 
 const app = express();
-app.set("view engine", "ejs");
+app.set("view engine", "pug");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(shopRoutes);
