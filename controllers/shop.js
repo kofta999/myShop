@@ -10,13 +10,15 @@ exports.getAllProducts = (req, res) => {
   });
 };
 
-/** @type {import("express").RequestHandler} */
 exports.getProduct = (req, res) => {
   const productId = req.params.productId;
   Product.findById(productId, (product) => {
-    console.log(product);
+    res.render("shop/productDetail", {
+      product: product,
+      docTitle: product.title,
+      path: "/products"
+    });
   });
-  res.redirect("/");
 };
 
 exports.getIndex = (req, res) => {
@@ -32,6 +34,12 @@ exports.getIndex = (req, res) => {
 exports.getCart = (req, res) => {
   res.render("shop/cart", { path: "/cart", docTitle: "Cart" });
 };
+/** @type {import("express").RequestHandler} */
+exports.postCart = (req, res) => {
+  const productId = req.body.productId;
+  console.log(productId);
+  res.redirect("/cart")
+}
 
 exports.getCheckout = (req, res) => {
   res.render("shop/checkout", { path: "/checkout", docTitle: "Checkout" });
