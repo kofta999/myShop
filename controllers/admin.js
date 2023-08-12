@@ -9,6 +9,7 @@ exports.getAddProduct = (req, res) => {
 
 exports.postAddProduct = (req, res) => {
   const product = new Product(
+    null,
     req.body.title,
     req.body.imageUrl,
     req.body.description,
@@ -21,7 +22,7 @@ exports.postAddProduct = (req, res) => {
 exports.getEditProduct = (req, res) => {
   const productId = req.params.productId;
   Product.findById(productId, (product) => {
-    if (!product) return res.redirect('/')
+    if (!product) return res.redirect("/");
     res.render("admin/editProduct", {
       docTitle: "Edit product",
       path: "/admin/edit-product",
@@ -32,8 +33,16 @@ exports.getEditProduct = (req, res) => {
 };
 
 exports.postEditProduct = (req, res) => {
-  
-}
+  const updatedProduct = new Product(
+    req.body.productId,
+    req.body.title,
+    req.body.imageUrl,
+    req.body.description,
+    req.body.price
+  )
+  updatedProduct.save()
+  res.redirect("/admin/products")
+};
 
 exports.getAdminProducts = (req, res) => {
   Product.fetchAll((products) => {
