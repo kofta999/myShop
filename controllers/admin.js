@@ -39,9 +39,15 @@ exports.postEditProduct = (req, res) => {
     req.body.imageUrl,
     req.body.description,
     req.body.price
-  )
-  updatedProduct.save()
-  res.redirect("/admin/products")
+  );
+  updatedProduct.save();
+  res.redirect("/admin/products");
+};
+
+exports.postDeleteProduct = (req, res) => {
+  const productId = req.body.productId;
+  Product.deleteById(productId)
+  res.redirect("/admin/products");
 };
 
 exports.getAdminProducts = (req, res) => {
