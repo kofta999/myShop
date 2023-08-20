@@ -3,7 +3,7 @@ const Product = require("../models/product");
 exports.getAddProduct = (req, res) => {
   res.render("admin/editProduct", {
     docTitle: "Add product",
-    path: "/admin/add-product"
+    path: "/admin/add-product",
   });
 };
 
@@ -15,8 +15,10 @@ exports.postAddProduct = (req, res) => {
     req.body.description,
     req.body.price
   );
-  product.save();
-  res.redirect("/");
+  product
+    .save()
+    .then(() => res.redirect("/"))
+    .catch((err) => console.log(err));
 };
 
 exports.getEditProduct = (req, res) => {
@@ -27,7 +29,7 @@ exports.getEditProduct = (req, res) => {
       docTitle: "Edit product",
       path: "/admin/edit-product",
       editing: true,
-      product: product
+      product: product,
     });
   });
 };
@@ -46,16 +48,15 @@ exports.postEditProduct = (req, res) => {
 
 exports.postDeleteProduct = (req, res) => {
   const productId = req.body.productId;
-  Product.deleteById(productId)
-  res.redirect("/admin/products");
+  Product.deleteById(productId).then(() => res.redirect("/admin/products"));
 };
 
 exports.getAdminProducts = (req, res) => {
-  Product.fetchAll((products) => {
+  Product.fetchAll().then(([products]) => {
     res.render("admin/products", {
       prods: products,
       docTitle: "Admin Products",
-      path: "/admin/products"
+      path: "/admin/products",
     });
   });
 };
