@@ -1,0 +1,20 @@
+extends ../layouts/main-layout.pug
+block styles
+  link(rel="stylesheet", href="/css/cart.css")
+
+block content
+  main
+    if products.length > 0
+      ul.cart__item-list
+        each p in products
+          li.cart__item
+            p #{p.title} (#{p.cartItem.quantity})
+            form(action="/cart-delete-item", method="post")
+              input(type="hidden", name="productId" value=p.id)
+              button.btn.danger(type="submit") Delete
+      hr
+      .centered
+        form(action="/create-order", method="post")
+          button.btn(type="submit") Order Now!
+    else
+      h1 No products in cart
