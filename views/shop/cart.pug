@@ -8,9 +8,9 @@ block content
       ul.cart__item-list
         each p in products
           li.cart__item
-            p #{p.title} (#{p.cartItem.quantity})
+            p #{p.title} (#{p.quantity})
             form(action="/cart-delete-item", method="post")
-              input(type="hidden", name="productId" value=p.id)
+              input(type="hidden", name="productId" value=p._id)
               button.btn.danger(type="submit") Delete
       hr
       .centered
