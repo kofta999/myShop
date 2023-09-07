@@ -1,7 +1,8 @@
+const Order = require("../models/order");
 const Product = require("../models/product");
 
 exports.getProducts = (req, res) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/listProducts", {
         prods: products,
@@ -14,7 +15,6 @@ exports.getProducts = (req, res) => {
 
 exports.getProduct = (req, res) => {
   const productId = req.params.productId;
-  console.log(productId);
   Product.findById(productId)
     .then((product) => {
       res.render("shop/productDetail", {
@@ -27,7 +27,7 @@ exports.getProduct = (req, res) => {
 };
 
 exports.getIndex = (req, res) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
@@ -40,12 +40,12 @@ exports.getIndex = (req, res) => {
 
 exports.getCart = (req, res) => {
   req.user
-    .getCart()
-    .then((products) => {
+    .populate("cart.items.productId")
+    .then((user) => {
       res.render("shop/cart", {
         path: "/cart",
         docTitle: "Cart",
-        products: products,
+        products: user.cart.items,
       });
     })
     .catch((err) => console.log(err));
@@ -76,8 +76,8 @@ exports.getCheckout = (req, res) => {
 };
 
 exports.getOrders = (req, res) => {
-  req.user
-    .getOrders()
+  Order.find({ "user._id": req.user._id })
+    .populate("items.productId")
     .then((orders) => {
       res.render("shop/orders", {
         path: "/orders",

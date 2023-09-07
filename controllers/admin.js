@@ -8,14 +8,14 @@ exports.getAddProduct = (req, res) => {
 };
 
 exports.postAddProduct = (req, res) => {
-  const product = new Product(
-    req.body.title,
-    req.body.price,
-    req.body.description,
-    req.body.imageUrl,
-    null,
-    req.user._id
-  );
+  const product = new Product({
+    title: req.body.title,
+    price: req.body.price,
+    description: req.body.description,
+    imageUrl: req.body.imageUrl,
+    userId: req.user
+  });
+
   product
     .save()
     .then(() => res.redirect("/admin/products"))
@@ -39,21 +39,21 @@ exports.getEditProduct = (req, res) => {
 
 exports.postEditProduct = (req, res) => {
   const productId = req.body.productId;
-  const product = new Product(
-    req.body.title,
-    req.body.price,
-    req.body.description,
-    req.body.imageUrl,
-    productId
-  );
-  product
-    .save()
+
+  Product.findById(productId)
+    .then((product) => {
+      product.title = req.body.title;
+      product.price = req.body.price;
+      product.description = req.body.description;
+      product.imageUrl = req.body.imageUrl;
+      return product.save();
+    })
     .then(() => res.redirect("/admin/products"))
     .catch((err) => console.log(err));
 };
 
 exports.getAdminProducts = (req, res) => {
-  Product.fetchAll()
+  Product.find()
     .then((products) => {
       res.render("admin/products", {
         prods: products,
@@ -66,7 +66,7 @@ exports.getAdminProducts = (req, res) => {
 
 exports.postDeleteProduct = (req, res) => {
   const productId = req.body.productId;
-  Product.deleteById(productId).then(() => {
+  Product.findByIdAndDelete(productId).then(() => {
     res.redirect("/admin/products");
     console.log("DESTROYED PRODUCT");
   });
