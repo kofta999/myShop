@@ -64,7 +64,7 @@ userSchema.methods.addOrder = function () {
   const order = new Order({
     user: {
       _id: this._id,
-      name: this.name,
+      email: this.email,
     },
     items: this.cart.items,
   });

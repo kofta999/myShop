@@ -11,11 +11,13 @@ block content
             h1 #{p.productId.title}
             h2 Quantity: #{p.quantity}
             form(action="/cart-delete-item", method="post")
+              input(type="hidden" name="_csrf" value=(csrfToken))
               input(type="hidden", name="productId" value=p.productId._id)
               button.btn.danger(type="submit") Delete
       hr
       .centered
         form(action="/create-order", method="post")
+          input(type="hidden" name="_csrf" value=(csrfToken))
           button.btn(type="submit") Order Now!
     else
       h1 No products in cart
