@@ -4,16 +4,27 @@ block styles
   link(rel="stylesheet" href="/css/auth.css")
 
 block content
+  #{console.log(validationErrors)}
   main
     if errorMessage
       .user-message.user-message__error #{errorMessage}
     form.login-form(action=`/login` method="POST")
       .form-control
         label(for="email") Email
-        input(type="email" name="email" id="email")
+        input(
+          class=(validationErrors.find(e => e.path === 'email') ? 'invalid' : '')
+          type="email"
+          name="email"
+          id="email"
+          value=(oldInput.email))
       .form-control
         label(for="password") Password
-        input(type="password" name="password" id="password" value=(editing ? login.password : ""))
+        input(
+          class=(validationErrors.find(e => e.path === 'password') ? 'invalid' : '')
+          type="password"
+          name="password"
+          id="password"
+          value=(oldInput.password))
       input(type="hidden" name="_csrf" value=(csrfToken))
       button.btn(type="submit") Login
     .centered 
