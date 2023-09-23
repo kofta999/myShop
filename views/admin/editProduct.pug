@@ -23,4 +23,4 @@ block content
       if (editing || hasError)
         input(type="hidden" value=product._id name="productId")
       input(type="hidden" name="_csrf" value=(csrfToken))
-      button.btn(type="submit") #{(editing || hasError) ? "Update Product" : "Add Product"}
+      button.btn(type="submit") #{(editing) ? "Update Product" : "Add Product"}

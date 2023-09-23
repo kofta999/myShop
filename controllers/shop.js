@@ -1,5 +1,6 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
+const { errorHandler } = require("./errors");
 
 exports.getProducts = (req, res) => {
   Product.find()
@@ -11,7 +12,7 @@ exports.getProducts = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.getProduct = (req, res) => {
@@ -25,7 +26,7 @@ exports.getProduct = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err.message));
+    .catch(errorHandler(err));
 };
 
 exports.getIndex = (req, res) => {
@@ -39,7 +40,7 @@ exports.getIndex = (req, res) => {
         csrfToken: req.csrfToken(),
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.getCart = (req, res) => {
@@ -53,7 +54,7 @@ exports.getCart = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postCart = (req, res) => {
@@ -63,7 +64,7 @@ exports.postCart = (req, res) => {
       return req.user.addToCart(product);
     })
     .then(() => res.redirect("/cart"))
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postCartDeleteProduct = (req, res) => {
@@ -73,7 +74,7 @@ exports.postCartDeleteProduct = (req, res) => {
     .then(() => {
       res.redirect("/cart");
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.getCheckout = (req, res) => {
@@ -95,12 +96,12 @@ exports.getOrders = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postOrder = (req, res) => {
   return req.user
     .addOrder()
     .then(() => res.redirect("/orders"))
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };

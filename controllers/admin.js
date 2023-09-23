@@ -1,5 +1,6 @@
 const Product = require("../models/product");
 const { validationResult } = require("express-validator");
+const { errorHandler } = require("./errors")
 
 exports.getAddProduct = (req, res) => {
   res.render("admin/editProduct", {
@@ -8,10 +9,11 @@ exports.getAddProduct = (req, res) => {
     isAuthenticated: req.session.isLoggedIn,
     hasError: false,
     errorMessage: null,
+    validationErrors: [],
   });
 };
 
-exports.postAddProduct = (req, res) => {
+exports.postAddProduct = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(422).render("admin/editProduct", {
@@ -41,7 +43,7 @@ exports.postAddProduct = (req, res) => {
   product
     .save()
     .then(() => res.redirect("/admin/products"))
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.getEditProduct = (req, res) => {
@@ -60,7 +62,7 @@ exports.getEditProduct = (req, res) => {
         validationErrors: [],
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postEditProduct = (req, res) => {
@@ -77,7 +79,7 @@ exports.postEditProduct = (req, res) => {
         price: req.body.price,
         description: req.body.description,
         imageUrl: req.body.imageUrl,
-        _id: productId
+        _id: productId,
       },
       isAuthenticated: req.session.isLoggedIn,
       errorMessage: errors.array()[0].msg,
@@ -97,7 +99,7 @@ exports.postEditProduct = (req, res) => {
       console.log(product);
       return product.save().then(() => res.redirect("/admin/products"));
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.getAdminProducts = (req, res) => {
@@ -110,7 +112,7 @@ exports.getAdminProducts = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postDeleteProduct = (req, res) => {

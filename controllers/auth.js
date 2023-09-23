@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const crypto = require("crypto");
 const { validationResult } = require("express-validator");
+const { errorHandler } = require("./errors");
 require("dotenv").config();
 
 const User = require("../models/user");
@@ -83,7 +84,6 @@ exports.postLogin = (req, res, next) => {
             req.session.isLoggedIn = true;
             req.session.user = user;
             return req.session.save((err) => {
-              console.log(err);
               res.redirect("/");
             });
           }
@@ -99,11 +99,10 @@ exports.postLogin = (req, res, next) => {
           });
         })
         .catch((err) => {
-          console.log(err);
           res.redirect("/login");
         });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postSignup = (req, res, next) => {
@@ -111,7 +110,6 @@ exports.postSignup = (req, res, next) => {
   const password = req.body.password;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log(errors.array());
     return res.status(422).render("auth/signup", {
       path: "/signup",
       pageTitle: "Signup",
@@ -141,14 +139,11 @@ exports.postSignup = (req, res, next) => {
         html: "<h1>Successfully signed up!</h1>",
       });
     })
-    .catch((err) => {
-      console.log(err);
-    });
+    .catch(errorHandler(err));
 };
 
 exports.postLogout = (req, res, next) => {
   req.session.destroy((err) => {
-    console.log(err);
     res.redirect("/");
   });
 };
@@ -173,7 +168,6 @@ exports.getReset = (req, res) => {
 exports.postReset = (req, res) => {
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
-      console.log(err);
       res.redirect("/reset");
     }
     const token = buffer.toString("hex");
@@ -199,7 +193,7 @@ exports.postReset = (req, res) => {
           <a href="http://localhost:3000/reset/${token}">Link</a>`,
         });
       })
-      .catch((err) => console.log(err));
+      .catch(errorHandler(err));
   });
 };
 
@@ -218,7 +212,7 @@ exports.getNewPassword = (req, res) => {
         passwordToken: token,
       });
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
 
 exports.postNewPassword = (req, res) => {
@@ -245,5 +239,5 @@ exports.postNewPassword = (req, res) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch((err) => console.log(err));
+    .catch(errorHandler(err));
 };
