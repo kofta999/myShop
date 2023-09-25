@@ -1,8 +1,8 @@
 const Product = require("../models/product");
 const { validationResult } = require("express-validator");
-const { errorHandler } = require("./errors")
+const fileHelper = require("../util/file");
 
-exports.getAddProduct = (req, res) => {
+exports.getAddProduct = (req, res, next) => {
   res.render("admin/editProduct", {
     docTitle: "Add product",
     path: "/admin/add-product",
@@ -14,9 +14,9 @@ exports.getAddProduct = (req, res) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(422).render("admin/editProduct", {
+  const image = req.file;
+  if (!image) {
+    return res.status(422).render("admin/editProduct", {
       docTitle: "Add product",
       path: "/admin/add-product",
       editing: false,
@@ -25,28 +25,50 @@ exports.postAddProduct = (req, res, next) => {
         title: req.body.title,
         price: req.body.price,
         description: req.body.description,
-        imageUrl: req.body.imageUrl,
+      },
+      isAuthenticated: req.session.isLoggedIn,
+      errorMessage: "Attached file is not an image",
+      validationErrors: [],
+    });
+  }
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).render("admin/editProduct", {
+      docTitle: "Add product",
+      path: "/admin/add-product",
+      editing: false,
+      hasError: true,
+      product: {
+        title: req.body.title,
+        price: req.body.price,
+        description: req.body.description,
       },
       isAuthenticated: req.session.isLoggedIn,
       errorMessage: errors.array()[0].msg,
       validationErrors: errors.array(),
     });
   }
+
   const product = new Product({
     title: req.body.title,
     price: req.body.price,
     description: req.body.description,
-    imageUrl: req.body.imageUrl,
+    imageUrl: image.path,
     userId: req.user,
   });
 
   product
     .save()
     .then(() => res.redirect("/admin/products"))
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.getEditProduct = (req, res) => {
+exports.getEditProduct = (req, res, next) => {
   const productId = req.params.productId;
   Product.findById(productId)
     .then((product) => {
@@ -62,10 +84,15 @@ exports.getEditProduct = (req, res) => {
         validationErrors: [],
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.postEditProduct = (req, res) => {
+exports.postEditProduct = (req, res, next) => {
+  const image = req.file;
   const productId = req.body.productId;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -78,7 +105,6 @@ exports.postEditProduct = (req, res) => {
         title: req.body.title,
         price: req.body.price,
         description: req.body.description,
-        imageUrl: req.body.imageUrl,
         _id: productId,
       },
       isAuthenticated: req.session.isLoggedIn,
@@ -95,14 +121,20 @@ exports.postEditProduct = (req, res) => {
       product.title = req.body.title;
       product.price = req.body.price;
       product.description = req.body.description;
-      product.imageUrl = req.body.imageUrl;
-      console.log(product);
+      if (image) {
+        fileHelper.deleteFile(product.imageUrl);
+        product.imageUrl = image.path;
+      }
       return product.save().then(() => res.redirect("/admin/products"));
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.getAdminProducts = (req, res) => {
+exports.getAdminProducts = (req, res, next) => {
   Product.find({ userId: req.user._id })
     .then((products) => {
       res.render("admin/products", {
@@ -112,13 +144,30 @@ exports.getAdminProducts = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.postDeleteProduct = (req, res) => {
+exports.postDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
-  Product.deleteOne({ _id: productId, userId: req.user._id }).then(() => {
-    res.redirect("/admin/products");
-    console.log("DESTROYED PRODUCT");
-  });
+  Product.findById(productId)
+    .then((prod) => {
+      if (!prod) {
+        return next(new Error("Product not found."));
+      }
+      fileHelper.deleteFile(prod.imageUrl);
+      return Product.deleteOne({ _id: productId, userId: req.user._id });
+    })
+    .then(() => {
+      res.redirect("/admin/products");
+      console.log("DESTROYED PRODUCT");
+    })
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };

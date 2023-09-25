@@ -11,7 +11,6 @@ router.post(
   isAuthenticated,
   [
     body("title").isString().isLength({ min: 3 }).trim(),
-    body("imageUrl").isURL().trim(),
     body("price").isFloat().trim(),
     body("description").isLength({ min: 5 }).isString(),
   ],
@@ -26,7 +25,6 @@ router.post(
   "/edit-product",
   [
     body("title").isString().isLength({ min: 3 }).trim(),
-    body("imageUrl").isURL().trim(),
     body("price").isFloat().trim(),
     body("description").isLength({ min: 5 }).isString(),
   ],

@@ -1,8 +1,10 @@
+const fs = require("fs");
+const path = require("path");
+const PDFDocument = require("pdfkit");
 const Order = require("../models/order");
 const Product = require("../models/product");
-const { errorHandler } = require("./errors");
 
-exports.getProducts = (req, res) => {
+exports.getProducts = (req, res, next) => {
   Product.find()
     .then((products) => {
       res.render("shop/listProducts", {
@@ -12,10 +14,14 @@ exports.getProducts = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.getProduct = (req, res) => {
+exports.getProduct = (req, res, next) => {
   const productId = req.params.productId;
   Product.findById(productId)
     .then((product) => {
@@ -26,10 +32,14 @@ exports.getProduct = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.getIndex = (req, res) => {
+exports.getIndex = (req, res, next) => {
   Product.find()
     .then((products) => {
       res.render("shop/index", {
@@ -40,10 +50,14 @@ exports.getIndex = (req, res) => {
         csrfToken: req.csrfToken(),
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.getCart = (req, res) => {
+exports.getCart = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .then((user) => {
@@ -54,30 +68,42 @@ exports.getCart = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.postCart = (req, res) => {
+exports.postCart = (req, res, next) => {
   const productId = req.body.productId;
   Product.findById(productId)
     .then((product) => {
       return req.user.addToCart(product);
     })
     .then(() => res.redirect("/cart"))
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.postCartDeleteProduct = (req, res) => {
+exports.postCartDeleteProduct = (req, res, next) => {
   const productId = req.body.productId;
   req.user
     .deleteItemFromCart(productId)
     .then(() => {
       res.redirect("/cart");
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.getCheckout = (req, res) => {
+exports.getCheckout = (req, res, next) => {
   res.render("shop/checkout", {
     path: "/checkout",
     docTitle: "Checkout",
@@ -85,7 +111,7 @@ exports.getCheckout = (req, res) => {
   });
 };
 
-exports.getOrders = (req, res) => {
+exports.getOrders = (req, res, next) => {
   Order.find({ "user._id": req.user._id })
     .populate("items.productId")
     .then((orders) => {
@@ -96,12 +122,64 @@ exports.getOrders = (req, res) => {
         isAuthenticated: req.session.isLoggedIn,
       });
     })
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
 };
 
-exports.postOrder = (req, res) => {
+exports.postOrder = (req, res, next) => {
   return req.user
     .addOrder()
     .then(() => res.redirect("/orders"))
-    .catch(errorHandler(err));
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
+    });
+};
+
+exports.getInvoice = (req, res, next) => {
+  const orderId = req.params.orderId;
+  Order.findById(orderId, undefined, { populate: "items.productId" })
+    .then((order) => {
+      if (!order) {
+        return next(new Error("No order found."));
+      }
+      if (order.user._id === req.user._id.toString()) {
+        return next(new Error("Unauthorized."));
+      }
+      const invoiceName = "invoice-" + orderId + ".pdf";
+      const invoicePath = path.join("data", "invoices", invoiceName);
+      const pdfDoc = new PDFDocument();
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        'inline; filename="' + invoiceName + '"'
+      );
+      pdfDoc.pipe(fs.createWriteStream(invoicePath));
+      pdfDoc.pipe(res);
+
+      pdfDoc.fontSize(26).text("Invoice", { underline: true });
+      pdfDoc.text("---------------------");
+      let totalPrice = 0;
+      order.items.forEach((item) => {
+        totalPrice += item.quantity * item.productId.price;
+        pdfDoc
+          .fontSize(14)
+          .text(
+            item.productId.title +
+              " - " +
+              item.quantity +
+              " x " +
+              "$" +
+              item.productId.price
+          );
+      });
+      pdfDoc.text("---");
+      pdfDoc.fontSize(20).text("Total price $" + totalPrice);
+      pdfDoc.end();
+    })
+    .catch((err) => next(err));
 };

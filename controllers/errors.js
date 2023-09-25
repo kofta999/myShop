@@ -17,9 +17,3 @@ exports.get500 = (req, res) => {
       isAuthenticated: req.isLoggedIn,
     });
 };
-
-exports.errorHandler = (err) => {
-  const error = new Error(err);
-  error.httpStatusCode = 500;
-  next(error);
-};

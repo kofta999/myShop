@@ -7,13 +7,16 @@ block content
   main
     if errorMessage
       .user-message.user-message__error #{errorMessage}
-    form.product-form(action=`/admin/${(editing || hasError) ? "edit" : "add"}-product` method="POST")
+    form.product-form(action=`/admin/${(editing || hasError) ? "edit" : "add"}-product` method="POST" enctype="multipart/form-data")
       .form-control
         label(for="title") Title
         input(class=(validationErrors.find(e => e.path === 'title') ? 'invalid' : '') type="text" name="title" id="title" value=((editing || hasError) ? product.title : ""))
+      //- .form-control
+      //-   label(for="imageUrl") Image URL
+      //-   input(class=(validationErrors.find(e => e.path === 'imageUrl') ? 'invalid' : '') type="text" name="imageUrl" id="imageUrl" value=((editing || hasError) ? product.imageUrl : ""))
       .form-control
-        label(for="imageUrl") Image URL
-        input(class=(validationErrors.find(e => e.path === 'imageUrl') ? 'invalid' : '') type="text" name="imageUrl" id="imageUrl" value=((editing || hasError) ? product.imageUrl : ""))
+        label(for="image") Image
+          input(type="file", name="image" id="image")
       .form-control
         label(for="price") Price
         input(class=(validationErrors.find(e => e.path === 'price') ? 'invalid' : '') type="number" name="price" id="price" step="0.01" value=((editing || hasError) ? product.price : ""))

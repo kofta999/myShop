@@ -3,7 +3,6 @@ const nodemailer = require("nodemailer");
 const sendgridTransport = require("nodemailer-sendgrid-transport");
 const crypto = require("crypto");
 const { validationResult } = require("express-validator");
-const { errorHandler } = require("./errors");
 require("dotenv").config();
 
 const User = require("../models/user");
@@ -102,7 +101,11 @@ exports.postLogin = (req, res, next) => {
           res.redirect("/login");
         });
     })
-    .catch(errorHandler(err));
+    .catch(err => {
+        const error = new Error(err);
+  error.httpStatusCode = 500;
+  next(error);
+    });
 };
 
 exports.postSignup = (req, res, next) => {
@@ -139,7 +142,11 @@ exports.postSignup = (req, res, next) => {
         html: "<h1>Successfully signed up!</h1>",
       });
     })
-    .catch(errorHandler(err));
+    .catch(err => {
+        const error = new Error(err);
+  error.httpStatusCode = 500;
+  next(error);
+    });
 };
 
 exports.postLogout = (req, res, next) => {
@@ -193,7 +200,11 @@ exports.postReset = (req, res) => {
           <a href="http://localhost:3000/reset/${token}">Link</a>`,
         });
       })
-      .catch(errorHandler(err));
+      .catch(err => {
+          const error = new Error(err);
+  error.httpStatusCode = 500;
+  next(error);
+      });
   });
 };
 
@@ -212,7 +223,11 @@ exports.getNewPassword = (req, res) => {
         passwordToken: token,
       });
     })
-    .catch(errorHandler(err));
+    .catch(err => {
+        const error = new Error(err);
+  error.httpStatusCode = 500;
+  next(error);
+    });
 };
 
 exports.postNewPassword = (req, res) => {
@@ -239,5 +254,9 @@ exports.postNewPassword = (req, res) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch(errorHandler(err));
+    .catch(err => {
+        const error = new Error(err);
+  error.httpStatusCode = 500;
+  next(error);
+    });
 };
