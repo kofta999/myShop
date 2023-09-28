@@ -4,8 +4,8 @@ block styles
 
 block content
   main
-    .grid
-      if prods.length > 0
+    if prods.length > 0
+      .grid
         each product in prods
           article.card.product-item
             header.card__header
@@ -19,5 +19,6 @@ block content
               a.btn(href=`/products/${product._id}`) Details
               if isAuthenticated
                 include ../includes/add-to-cart.pug
-      else
-        h1 No products
+      include ../includes/pagination
+    else
+      h1 No products
