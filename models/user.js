@@ -62,18 +62,9 @@ userSchema.methods.deleteItemFromCart = function (productId) {
   return this.save();
 };
 
-userSchema.methods.addOrder = function () {
-  const order = new Order({
-    user: {
-      _id: this._id,
-      email: this.email,
-    },
-    items: this.cart.items,
-  });
-  return order.save().then(() => {
-    this.cart.items = [];
-    this.save();
-  });
+userSchema.methods.clearCart = function() {
+  this.cart = { items: [] };
+  return this.save();
 };
 
 module.exports = model("User", userSchema);
