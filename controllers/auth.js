@@ -101,10 +101,10 @@ exports.postLogin = (req, res, next) => {
           res.redirect("/login");
         });
     })
-    .catch(err => {
-        const error = new Error(err);
-  error.httpStatusCode = 500;
-  next(error);
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
@@ -142,10 +142,10 @@ exports.postSignup = (req, res, next) => {
         html: "<h1>Successfully signed up!</h1>",
       });
     })
-    .catch(err => {
-        const error = new Error(err);
-  error.httpStatusCode = 500;
-  next(error);
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
@@ -200,10 +200,10 @@ exports.postReset = (req, res) => {
           <a href="http://localhost:3000/reset/${token}">Link</a>`,
         });
       })
-      .catch(err => {
-          const error = new Error(err);
-  error.httpStatusCode = 500;
-  next(error);
+      .catch((err) => {
+        const error = new Error(err);
+        error.httpStatusCode = 500;
+        next(error);
       });
   });
 };
@@ -223,10 +223,10 @@ exports.getNewPassword = (req, res) => {
         passwordToken: token,
       });
     })
-    .catch(err => {
-        const error = new Error(err);
-  error.httpStatusCode = 500;
-  next(error);
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
 
@@ -254,9 +254,9 @@ exports.postNewPassword = (req, res) => {
     .then((result) => {
       res.redirect("/login");
     })
-    .catch(err => {
-        const error = new Error(err);
-  error.httpStatusCode = 500;
-  next(error);
+    .catch((err) => {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      next(error);
     });
 };
