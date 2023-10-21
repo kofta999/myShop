@@ -8,13 +8,17 @@ block content
       ul.cart__item-list
         each p in products
           li.cart__item
-            p #{p.title} (#{p.cartItem.quantity})
+            h1 #{p.productId.title}
+            h2 Quantity: #{p.quantity}
             form(action="/cart-delete-item", method="post")
-              input(type="hidden", name="productId" value=p.id)
+              input(type="hidden" name="_csrf" value=(csrfToken))
+              input(type="hidden", name="productId" value=p.productId._id)
               button.btn.danger(type="submit") Delete
       hr
       .centered
-        form(action="/create-order", method="post")
-          button.btn(type="submit") Order Now!
+        //- form(action="/create-order", method="post")
+        //-   input(type="hidden" name="_csrf" value=(csrfToken))
+        //-   button.btn(type="submit") Order Now!
+        a.btn(href="/checkout") Order Now!
     else
       h1 No products in cart
