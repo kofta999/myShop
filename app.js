@@ -23,8 +23,8 @@ const User = require("./models/user");
 require("dotenv").config();
 
 const app = express();
-const privateKey = fs.readFileSync("server.key");
-const certificate = fs.readFileSync("server.cert");
+// const privateKey = fs.readFileSync("server.key");
+// const certificate = fs.readFileSync("server.cert");
 const store = new MongoDBStore({
   uri: process.env.DATABASE_URI,
   collection: "sessions",
